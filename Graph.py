@@ -12,7 +12,6 @@ plt.gcf().autofmt_xdate()
 
 plt.axhline(y = 136, color = 'r', linestyle = '-')
 plt.axhline(y = 145, color = 'r', linestyle = '-')
-print ("Test")
 y=[140, 138, 142]
 plt.ylim(120, 160)
 plt.plot(x,y,markerfacecolor='Blue', marker='.')
