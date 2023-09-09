@@ -1,4 +1,5 @@
 import pdf2image, os, re
+from datetime import datetime
 
 try:
     from PIL import Image
@@ -28,6 +29,38 @@ def extractStrToTextFile(text,textFilename):
     f.close()
     return True
 
+def extractPatientDetails(textFilename):
+    with open(textFilename, "r") as f:
+        lines = f.readlines()
+        for row in lines:
+            if row.find("ex: ") != -1:
+                wordIndex = row.find("ex: ")
+                strLine = row[wordIndex+4:]
+                arrayTemp = strLine.split("/")
+                arrayData = []
+                dateFormat = "%d-%b-%Y"
+                for data in arrayTemp:
+                    data = data.strip()
+                    print (data)
+                    try:
+                        dt = datetime.strptime(data, dateFormat)
+                        bool(dt)
+                        dt = dt.date()
+                        arrayData.append(dt)
+                    except ValueError:
+                        if not arrayData:
+                            arrayData.append(None)
+                        elif " years" in data:
+                            data = data.replace(" years","")
+                            arrayData.append(int(data))
+                        elif len(arrayData) == 1:
+                            arrayData.append(None)
+                        elif "Male" in data:
+                            arrayData.append("Male")
+                        elif "Female" in data:
+                            arrayData.append("Female")
+    return arrayData
+
 def extractResults(textFilename, word):
     with open(textFilename, "r") as f:
         lines = f.readlines()
@@ -36,7 +69,7 @@ def extractResults(textFilename, word):
                 wordIndex = row.find(word)
                 strLine = row[wordIndex:]
                 extractResult = re.search(r'[0-9.]+', strLine)
-                print(extractResult)
+                #print(extractResult)
                 strResult = extractResult.group(0)
                 if strResult.isdigit():
                     result = int(strResult)
@@ -56,3 +89,7 @@ for pg, img in enumerate(images):
     text=ocr_core(img)
 extractStrToTextFile(text,textFilename)
 print (extractResults(textFilename, word))
+print ("***********************************")
+print (text)
+print ("***********************************")
+print (extractPatientDetails(textFilename))
